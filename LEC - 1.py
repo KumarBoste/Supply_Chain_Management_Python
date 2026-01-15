@@ -101,8 +101,11 @@ def data_exploration(df):
   return numerical_stats_report,categorical_stats_report
 
 
+# STEP - 3 : Data Information
+def dataset_info(df):
+  print(df.info())
 # ----------------------------------------------------------------------------------------
-
+'''
 def main() :
   df = data_ingesion()
   numerical_stats_report, categorical_stats_report = data_exploration(df)
@@ -111,3 +114,84 @@ def main() :
 
 
 main()
+'''
+
+df = data_ingesion()
+numerical_stats_report,categorical_stats_report = data_exploration(df)
+info = dataset_info(df)
+
+
+# Data Cleaning
+
+# Checking Duplicate Entries
+df.duplicated().sum()
+
+# This will help us to drop the duplicated entries from the data
+df.drop_duplicates(inplace = True)
+
+# Check the missing values in the dataset
+plt.figure(figsize=(10,15))
+df.isna().sum().plot(kind= 'barh')
+plt.title("Missing Values in SupplyChain Dataset")
+plt.show()
+
+# Dropping Product_Description and Order_Zipcode columns as these columns how more number of missing
+df.drop(columns=['Product_Description','Order_Zipcode'], axis = 1, inplace= True)
+
+## It giving name of Columns
+df.columns
+
+# Checking Null values in the columns 
+df.isna().sum()
+
+
+# Use for Display all the Columns
+pd.set_option("display.max_columns",None)
+df
+
+
+# Data Preprocessing
+# Change DataType of Two Columns
+df["order_date_(DateOrders)"] = pd.to_datetime(df["order_date_(DateOrders)"])
+df["shipping_date_(DateOrders)"] = pd.to_datetime(df["shipping_date_(DateOrders)"])
+
+df["order_month"] = df["order_date_(DateOrders)"].dt.month
+df["order_year"] = df["order_date_(DateOrders)"].dt.year
+df["order_day"] = df["order_date_(DateOrders)"].dt.day
+
+df["shipping_month"] = df["shipping_date_(DateOrders)"].dt.month
+df["shipping_year"] = df["shipping_date_(DateOrders)"].dt.year
+df["shipping_day"] = df["shipping_date_(DateOrders)"].dt.day
+
+
+
+plt.figure(figsize=(12,10))
+
+plt.subplot(1,2,1)
+df["order_year"].value_counts().plot(kind='pie',
+                                     autopct = '%0.2f%%',
+                                     explode = [0.04,0.04,0.04,0.04],
+                                     legend =['2015','2016','2017','2018']
+                                     )
+
+plt.title("Year Wise Percentage of Order Placed")
+
+
+plt.subplot(1,2,2)
+df["shipping_year"].value_counts().plot(kind='pie',
+                                     autopct = '%0.2f%%',
+                                     explode = [0.04,0.04,0.04,0.04],
+                                     legend =['2015','2016','2017','2018']
+                                     )
+
+plt.title("Year Wise Percentage of Shipping Order")
+plt.legend()
+plt.show()
+
+
+# Which Country Showing hightest number of Sales
+
+ct1 = pd.crosstab(index = [df["Order_Country"], df["Order_City"]],
+                           columns = [df["Product_Name"],df["Order_Profit_Per_Order"]],
+                  margins = True)
+ct1
